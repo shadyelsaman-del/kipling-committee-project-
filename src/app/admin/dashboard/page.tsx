@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { supabaseAdmin, PAYMENT_SCREENSHOTS_BUCKET } from "@/lib/supabase";
@@ -52,6 +53,12 @@ export default async function AdminDashboardPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <LogoutButton />
+      </div>
+      <div className="mt-2 flex gap-4 text-sm">
+        <span className="text-gray-400">Orders</span>
+        <Link href="/admin/restaurants" className="text-blue-600 hover:underline">
+          Restaurants &amp; Menus
+        </Link>
       </div>
 
       {dates.length === 0 && (
