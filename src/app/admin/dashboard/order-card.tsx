@@ -84,7 +84,7 @@ export function OrderCard({ order }: { order: DashboardOrder }) {
           href={order.screenshotUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-block text-sm text-blue-600 hover:underline"
+          className="mt-3 inline-block text-sm text-brand-600 hover:underline"
         >
           View payment screenshot
         </a>

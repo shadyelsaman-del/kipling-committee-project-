@@ -21,7 +21,7 @@ export default function CheckoutPage() {
     return (
       <main className="flex-1 flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
         <h1 className="text-2xl font-bold">Your cart is empty</h1>
-        <Link href="/order" className="text-blue-600 font-medium hover:underline">
+        <Link href="/order" className="text-brand-600 font-medium hover:underline">
           Browse restaurants
         </Link>
       </main>
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
           />
         </div>
 
-        <div className="mt-4 rounded-lg bg-blue-50 border border-blue-200 p-4">
+        <div className="mt-4 rounded-lg bg-brand-50 border border-brand-200 p-4">
           <h2 className="font-semibold">Payment</h2>
           <p className="text-sm text-gray-700 mt-1">
             {PAYMENT_DETAILS.instructions}
@@ -191,7 +191,7 @@ export default function CheckoutPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 rounded-lg bg-blue-600 px-6 py-3 text-white font-medium hover:bg-blue-700 transition disabled:opacity-60"
+          className="mt-2 rounded-full bg-brand-600 px-6 py-3 text-white font-medium hover:bg-brand-700 transition disabled:opacity-60"
         >
           {submitting ? "Submitting..." : "Submit order"}
         </button>

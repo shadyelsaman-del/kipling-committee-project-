@@ -39,7 +39,7 @@ export default async function AdminRestaurantDetailPage({
 
   return (
     <main className="flex-1 px-6 py-10 max-w-2xl mx-auto w-full">
-      <Link href="/admin/restaurants" className="text-sm text-blue-600 hover:underline">
+      <Link href="/admin/restaurants" className="text-sm text-brand-600 hover:underline">
         &larr; All restaurants
       </Link>
       <h1 className="text-2xl font-bold mt-2">{restaurant.name}</h1>

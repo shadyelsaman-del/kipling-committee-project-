@@ -102,7 +102,7 @@ function MenuItemRow({ item }: { item: MenuItem }) {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-md bg-blue-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60"
+            className="rounded-full bg-brand-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-brand-700 transition disabled:opacity-60"
           >
             {saving ? "Saving..." : "Save"}
           </button>
@@ -229,7 +229,7 @@ function NewMenuItemForm({ restaurantId }: { restaurantId: string }) {
       <button
         type="submit"
         disabled={submitting}
-        className="self-start rounded-md bg-blue-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60"
+        className="self-start rounded-full bg-brand-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-brand-700 transition disabled:opacity-60"
       >
         {submitting ? "Adding..." : "Add item"}
       </button>

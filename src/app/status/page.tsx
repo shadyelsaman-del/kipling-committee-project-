@@ -77,7 +77,7 @@ function StatusContent() {
         />
         <button
           type="submit"
-          className="rounded-md bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700 transition"
+          className="rounded-full bg-brand-600 px-4 py-2 text-white font-medium hover:bg-brand-700 transition"
         >
           Look up
         </button>
@@ -120,7 +120,7 @@ function StatusContent() {
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${
                           reached
-                            ? "bg-blue-600 text-white"
+                            ? "bg-brand-600 text-white"
                             : "bg-gray-100 text-gray-500"
                         }`}
                       >

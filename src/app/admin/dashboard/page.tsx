@@ -56,7 +56,7 @@ export default async function AdminDashboardPage() {
       </div>
       <div className="mt-2 flex gap-4 text-sm">
         <span className="text-gray-400">Orders</span>
-        <Link href="/admin/restaurants" className="text-blue-600 hover:underline">
+        <Link href="/admin/restaurants" className="text-brand-600 hover:underline">
           Restaurants &amp; Menus
         </Link>
       </div>

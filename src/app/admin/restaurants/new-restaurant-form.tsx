@@ -61,7 +61,7 @@ export function NewRestaurantForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="self-start rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60"
+        className="self-start rounded-full bg-brand-600 px-4 py-2 text-white text-sm font-medium hover:bg-brand-700 transition disabled:opacity-60"
       >
         {submitting ? "Adding..." : "Add restaurant"}
       </button>

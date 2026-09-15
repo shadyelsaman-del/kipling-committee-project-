@@ -27,7 +27,7 @@ export default async function AdminRestaurantsPage() {
         <LogoutButton />
       </div>
       <div className="mt-2 flex gap-4 text-sm">
-        <Link href="/admin/dashboard" className="text-blue-600 hover:underline">
+        <Link href="/admin/dashboard" className="text-brand-600 hover:underline">
           Orders
         </Link>
         <span className="text-gray-400">Restaurants &amp; Menus</span>
@@ -40,7 +40,7 @@ export default async function AdminRestaurantsPage() {
           <li key={r.id}>
             <Link
               href={`/admin/restaurants/${r.id}`}
-              className="block rounded-lg border border-gray-200 bg-white p-4 hover:border-blue-400 hover:shadow-sm transition"
+              className="block rounded-lg border border-gray-200 bg-white p-4 hover:border-brand-400 hover:shadow-sm transition"
             >
               <div className="flex items-center justify-between">
                 <span className="font-semibold">{r.name}</span>

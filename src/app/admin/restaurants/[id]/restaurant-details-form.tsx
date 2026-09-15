@@ -85,7 +85,7 @@ export function RestaurantDetailsForm({ restaurant }: { restaurant: Restaurant }
         <button
           type="submit"
           disabled={saving}
-          className="rounded-md bg-blue-600 px-4 py-2 text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60"
+          className="rounded-full bg-brand-600 px-4 py-2 text-white text-sm font-medium hover:bg-brand-700 transition disabled:opacity-60"
         >
           {saving ? "Saving..." : "Save changes"}
         </button>

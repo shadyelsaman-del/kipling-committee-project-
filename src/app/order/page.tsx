@@ -16,7 +16,7 @@ export default async function OrderPage() {
           Orders are only open on Saturdays (for Sunday delivery) and Mondays
           (for Tuesday delivery). Come back then!
         </p>
-        <Link href="/" className="text-blue-600 font-medium hover:underline">
+        <Link href="/" className="text-brand-600 font-medium hover:underline">
           Back home
         </Link>
       </main>
@@ -62,7 +62,7 @@ export default async function OrderPage() {
             <li key={r.id}>
               <Link
                 href={`/order/${r.id}`}
-                className="block rounded-lg border border-gray-200 bg-white p-4 hover:border-blue-400 hover:shadow-sm transition"
+                className="block rounded-lg border border-gray-200 bg-white p-4 hover:border-brand-400 hover:shadow-sm transition"
               >
                 <div className="font-semibold">{r.name}</div>
                 {r.description && (

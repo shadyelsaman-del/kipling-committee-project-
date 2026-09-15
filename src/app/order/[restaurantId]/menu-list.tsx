@@ -55,7 +55,7 @@ export function MenuList({
                       price: item.price,
                     })
                   }
-                  className="shrink-0 rounded-md bg-blue-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-blue-700 transition"
+                  className="shrink-0 rounded-full bg-brand-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-brand-700 transition"
                 >
                   Add
                 </button>
@@ -92,7 +92,7 @@ export function MenuList({
             </div>
             <Link
               href="/checkout"
-              className="rounded-lg bg-blue-600 px-5 py-2.5 text-white font-medium hover:bg-blue-700 transition"
+              className="rounded-full bg-brand-600 px-5 py-2.5 text-white font-medium hover:bg-brand-700 transition"
             >
               View Cart
             </Link>
