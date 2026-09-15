@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getScheduleInfo } from "@/lib/schedule";
-import { supabaseAdmin } from "@/lib/supabase";
-import type { MenuItem, Restaurant } from "@/types";
+import { getRestaurant } from "@/lib/data/restaurants";
+import { listMenuItemsByRestaurant } from "@/lib/data/menu-items";
 import { MenuList } from "./menu-list";
 
 export const dynamic = "force-dynamic";
@@ -29,25 +29,23 @@ export default async function RestaurantMenuPage({
     );
   }
 
-  const { data: restaurant } = await supabaseAdmin
-    .from("restaurants")
-    .select("*")
-    .eq("id", restaurantId)
-    .eq("is_active", true)
-    .maybeSingle<Restaurant>();
-
-  if (!restaurant) {
-    notFound();
+  let restaurant, menuItems;
+  try {
+    restaurant = await getRestaurant(restaurantId);
+    menuItems = restaurant
+      ? (await listMenuItemsByRestaurant(restaurantId)).filter((item) => item.is_available)
+      : [];
+  } catch {
+    return (
+      <main className="flex-1 flex items-center justify-center px-6 py-16 text-center text-red-600">
+        Something went wrong loading this restaurant. Please try again shortly.
+      </main>
+    );
   }
 
-  const { data: items } = await supabaseAdmin
-    .from("menu_items")
-    .select("*")
-    .eq("restaurant_id", restaurantId)
-    .eq("is_available", true)
-    .order("name");
-
-  const menuItems = (items ?? []) as MenuItem[];
+  if (!restaurant || !restaurant.is_active) {
+    notFound();
+  }
 
   return (
     <main className="flex-1 px-6 py-10 max-w-2xl mx-auto w-full">

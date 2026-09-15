@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { updateOrderStatus } from "@/lib/data/orders";
+import type { OrderStatus } from "@/types";
 
-const VALID_STATUSES = ["pending_review", "confirmed", "ready_for_pickup"];
+const VALID_STATUSES: OrderStatus[] = ["pending_review", "confirmed", "ready_for_pickup"];
 
 export async function PATCH(
   req: NextRequest,
@@ -19,16 +20,9 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid status." }, { status: 400 });
   }
 
-  const { error } = await supabaseAdmin
-    .from("orders")
-    .update({ status })
-    .eq("id", id);
-
-  if (error) {
-    return NextResponse.json(
-      { error: "Failed to update order." },
-      { status: 500 }
-    );
+  const ok = await updateOrderStatus(id, status);
+  if (!ok) {
+    return NextResponse.json({ error: "Failed to update order." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

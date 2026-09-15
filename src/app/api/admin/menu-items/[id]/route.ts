@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { deleteMenuItem, updateMenuItem } from "@/lib/data/menu-items";
 
 export async function PATCH(
   req: NextRequest,
@@ -12,7 +12,12 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await req.json();
-  const update: Record<string, unknown> = {};
+  const update: {
+    name?: string;
+    description?: string | null;
+    price?: number;
+    is_available?: boolean;
+  } = {};
 
   if (typeof body.name === "string") {
     if (!body.name.trim()) {
@@ -41,13 +46,9 @@ export async function PATCH(
     return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
   }
 
-  const { error } = await supabaseAdmin.from("menu_items").update(update).eq("id", id);
-
-  if (error) {
-    return NextResponse.json(
-      { error: "Failed to update menu item." },
-      { status: 500 }
-    );
+  const ok = await updateMenuItem(id, update);
+  if (!ok) {
+    return NextResponse.json({ error: "Failed to update menu item." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
@@ -63,13 +64,9 @@ export async function DELETE(
 
   const { id } = await params;
 
-  const { error } = await supabaseAdmin.from("menu_items").delete().eq("id", id);
-
-  if (error) {
-    return NextResponse.json(
-      { error: "Failed to delete menu item." },
-      { status: 500 }
-    );
+  const ok = await deleteMenuItem(id);
+  if (!ok) {
+    return NextResponse.json({ error: "Failed to delete menu item." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

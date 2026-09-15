@@ -19,27 +19,27 @@ export interface MenuItem {
   created_at: string;
 }
 
+export interface OrderLineItem {
+  menuItemId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  subtotal: number;
+}
+
 export interface Order {
   id: string;
+  created_at: string;
   student_name: string;
   student_class: string;
   student_phone: string;
   restaurant_id: string;
+  restaurant_name: string;
   delivery_date: string;
   status: OrderStatus;
-  payment_screenshot_path: string;
+  screenshot_url: string;
   total_amount: number;
-  created_at: string;
-}
-
-export interface OrderItem {
-  id: string;
-  order_id: string;
-  menu_item_id: string | null;
-  item_name: string;
-  item_price: number;
-  quantity: number;
-  subtotal: number;
+  items: OrderLineItem[];
 }
 
 export interface CartLine {

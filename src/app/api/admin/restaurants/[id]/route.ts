@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { deleteRestaurant, updateRestaurant } from "@/lib/data/restaurants";
+import { deleteMenuItemsByRestaurant } from "@/lib/data/menu-items";
+import { listOrdersByRestaurant } from "@/lib/data/orders";
 
 export async function PATCH(
   req: NextRequest,
@@ -12,7 +14,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await req.json();
-  const update: Record<string, unknown> = {};
+  const update: { name?: string; description?: string | null; is_active?: boolean } = {};
 
   if (typeof body.name === "string") {
     if (!body.name.trim()) {
@@ -23,9 +25,6 @@ export async function PATCH(
   if (typeof body.description === "string") {
     update.description = body.description.trim() || null;
   }
-  if (typeof body.imageUrl === "string") {
-    update.image_url = body.imageUrl.trim() || null;
-  }
   if (typeof body.isActive === "boolean") {
     update.is_active = body.isActive;
   }
@@ -34,16 +33,9 @@ export async function PATCH(
     return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
   }
 
-  const { error } = await supabaseAdmin
-    .from("restaurants")
-    .update(update)
-    .eq("id", id);
-
-  if (error) {
-    return NextResponse.json(
-      { error: "Failed to update restaurant." },
-      { status: 500 }
-    );
+  const ok = await updateRestaurant(id, update);
+  if (!ok) {
+    return NextResponse.json({ error: "Failed to update restaurant." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
@@ -59,13 +51,18 @@ export async function DELETE(
 
   const { id } = await params;
 
-  const { error } = await supabaseAdmin.from("restaurants").delete().eq("id", id);
-
-  if (error) {
+  const existingOrders = await listOrdersByRestaurant(id);
+  if (existingOrders.length > 0) {
     return NextResponse.json(
-      { error: "Failed to delete restaurant." },
-      { status: 500 }
+      { error: "Cannot delete a restaurant that has existing orders." },
+      { status: 400 }
     );
+  }
+
+  await deleteMenuItemsByRestaurant(id);
+  const ok = await deleteRestaurant(id);
+  if (!ok) {
+    return NextResponse.json({ error: "Failed to delete restaurant." }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

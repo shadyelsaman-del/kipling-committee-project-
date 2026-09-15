@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { supabaseAdmin } from "@/lib/supabase";
-import type { MenuItem, Restaurant } from "@/types";
+import { getRestaurant } from "@/lib/data/restaurants";
+import { listMenuItemsByRestaurant } from "@/lib/data/menu-items";
 import { RestaurantDetailsForm } from "./restaurant-details-form";
 import { MenuItemsManager } from "./menu-items-manager";
 
@@ -19,23 +19,21 @@ export default async function AdminRestaurantDetailPage({
 
   const { id } = await params;
 
-  const { data: restaurant } = await supabaseAdmin
-    .from("restaurants")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle<Restaurant>();
+  let restaurant, menuItems;
+  try {
+    restaurant = await getRestaurant(id);
+    menuItems = restaurant ? await listMenuItemsByRestaurant(id) : [];
+  } catch {
+    return (
+      <main className="flex-1 px-6 py-10 max-w-2xl mx-auto w-full">
+        <p className="text-red-600">Failed to load restaurant.</p>
+      </main>
+    );
+  }
 
   if (!restaurant) {
     notFound();
   }
-
-  const { data: items } = await supabaseAdmin
-    .from("menu_items")
-    .select("*")
-    .eq("restaurant_id", id)
-    .order("name");
-
-  const menuItems = (items ?? []) as MenuItem[];
 
   return (
     <main className="flex-1 px-6 py-10 max-w-2xl mx-auto w-full">

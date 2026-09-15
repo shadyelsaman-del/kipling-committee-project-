@@ -1,12 +1,14 @@
-import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getScheduleInfo } from "@/lib/schedule";
-import { supabaseAdmin, PAYMENT_SCREENSHOTS_BUCKET } from "@/lib/supabase";
+import { getMenuItemsByIds } from "@/lib/data/menu-items";
+import { getRestaurant } from "@/lib/data/restaurants";
+import { createOrder } from "@/lib/data/orders";
+import { uploadScreenshot } from "@/lib/google-drive";
 import {
   ALLOWED_SCREENSHOT_TYPES,
   MAX_SCREENSHOT_SIZE_BYTES,
 } from "@/lib/payment-config";
-import type { CartLine } from "@/types";
+import type { CartLine, OrderLineItem } from "@/types";
 
 export async function POST(req: NextRequest) {
   const schedule = getScheduleInfo();
@@ -63,86 +65,64 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const restaurant = await getRestaurant(restaurantId);
+  if (!restaurant || !restaurant.is_active) {
+    return NextResponse.json(
+      { error: "Restaurant is no longer available." },
+      { status: 400 }
+    );
+  }
+
   // Re-fetch menu items server-side to trust prices/availability, not the client cart.
   const menuItemIds = lines.map((l) => l.menuItemId);
-  const { data: menuItems, error: menuError } = await supabaseAdmin
-    .from("menu_items")
-    .select("*")
-    .in("id", menuItemIds)
-    .eq("restaurant_id", restaurantId)
-    .eq("is_available", true);
+  const menuItems = (await getMenuItemsByIds(menuItemIds)).filter(
+    (m) => m.restaurant_id === restaurantId && m.is_available
+  );
 
-  if (menuError || !menuItems || menuItems.length !== menuItemIds.length) {
+  if (menuItems.length !== menuItemIds.length) {
     return NextResponse.json(
       { error: "One or more items are no longer available." },
       { status: 400 }
     );
   }
 
-  const orderItems = lines.map((line) => {
+  const items: OrderLineItem[] = lines.map((line) => {
     const menuItem = menuItems.find((m) => m.id === line.menuItemId)!;
     const quantity = Math.max(1, Math.floor(line.quantity));
     return {
-      menu_item_id: menuItem.id,
-      item_name: menuItem.name,
-      item_price: menuItem.price,
+      menuItemId: menuItem.id,
+      name: menuItem.name,
+      price: menuItem.price,
       quantity,
       subtotal: Number((menuItem.price * quantity).toFixed(2)),
     };
   });
 
   const totalAmount = Number(
-    orderItems.reduce((sum, i) => sum + i.subtotal, 0).toFixed(2)
+    items.reduce((sum, i) => sum + i.subtotal, 0).toFixed(2)
   );
 
-  const extension = screenshot.name.split(".").pop() || "jpg";
-  const storagePath = `${schedule.deliveryDate}/${randomUUID()}.${extension}`;
-
-  const { error: uploadError } = await supabaseAdmin.storage
-    .from(PAYMENT_SCREENSHOTS_BUCKET)
-    .upload(storagePath, screenshot, {
-      contentType: screenshot.type,
-      upsert: false,
-    });
-
-  if (uploadError) {
+  let screenshotUrl: string;
+  try {
+    screenshotUrl = await uploadScreenshot(screenshot);
+  } catch {
     return NextResponse.json(
       { error: "Failed to upload payment screenshot." },
       { status: 500 }
     );
   }
 
-  const { data: order, error: orderError } = await supabaseAdmin
-    .from("orders")
-    .insert({
-      student_name: studentName,
-      student_class: studentClass,
-      student_phone: studentPhone,
-      restaurant_id: restaurantId,
-      delivery_date: schedule.deliveryDate,
-      payment_screenshot_path: storagePath,
-      total_amount: totalAmount,
-    })
-    .select("id")
-    .single();
-
-  if (orderError || !order) {
-    return NextResponse.json(
-      { error: "Failed to create order." },
-      { status: 500 }
-    );
-  }
-
-  const { error: itemsError } = await supabaseAdmin.from("order_items").insert(
-    orderItems.map((i) => ({ ...i, order_id: order.id }))
-  );
-
-  if (itemsError) {
-    return NextResponse.json(
-      { error: "Failed to save order items." },
-      { status: 500 }
-    );
-  }
+  const order = await createOrder({
+    studentName,
+    studentClass,
+    studentPhone,
+    restaurantId,
+    restaurantName: restaurant.name,
+    deliveryDate: schedule.deliveryDate,
+    screenshotUrl,
+    totalAmount,
+    items,
+  });
 
   return NextResponse.json({ orderId: order.id });
 }

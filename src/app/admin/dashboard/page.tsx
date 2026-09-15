@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { supabaseAdmin, PAYMENT_SCREENSHOTS_BUCKET } from "@/lib/supabase";
+import { listAllOrders } from "@/lib/data/orders";
+import type { Order } from "@/types";
 import { LogoutButton } from "./logout-button";
-import { OrderCard, type DashboardOrder } from "./order-card";
+import { OrderCard } from "./order-card";
 
 export const dynamic = "force-dynamic";
 
@@ -12,15 +13,10 @@ export default async function AdminDashboardPage() {
     redirect("/admin");
   }
 
-  const { data: orders, error } = await supabaseAdmin
-    .from("orders")
-    .select(
-      "*, restaurants(name), order_items(id, item_name, item_price, quantity, subtotal)"
-    )
-    .order("delivery_date", { ascending: false })
-    .order("created_at", { ascending: true });
-
-  if (error || !orders) {
+  let orders: Order[];
+  try {
+    orders = await listAllOrders();
+  } catch {
     return (
       <main className="flex-1 px-6 py-10 max-w-4xl mx-auto w-full">
         <p className="text-red-600">Failed to load orders.</p>
@@ -28,23 +24,10 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  // Attach a signed URL for each payment screenshot (bucket is private).
-  const ordersWithUrls: DashboardOrder[] = await Promise.all(
-    orders.map(async (order) => {
-      const { data: signed } = await supabaseAdmin.storage
-        .from(PAYMENT_SCREENSHOTS_BUCKET)
-        .createSignedUrl(order.payment_screenshot_path, 60 * 60);
-      return { ...order, screenshotUrl: signed?.signedUrl ?? null };
-    })
-  );
-
-  const grouped = ordersWithUrls.reduce<Record<string, DashboardOrder[]>>(
-    (acc, order) => {
-      (acc[order.delivery_date] ??= []).push(order);
-      return acc;
-    },
-    {}
-  );
+  const grouped = orders.reduce<Record<string, Order[]>>((acc, order) => {
+    (acc[order.delivery_date] ??= []).push(order);
+    return acc;
+  }, {});
 
   const dates = Object.keys(grouped).sort((a, b) => (a < b ? 1 : -1));
 

@@ -2,24 +2,15 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import type { Order, OrderStatus } from "@/types";
 
-interface StatusOrder {
-  id: string;
-  student_name: string;
-  delivery_date: string;
-  status: "pending_review" | "confirmed" | "ready_for_pickup";
-  total_amount: number;
-  created_at: string;
-  restaurants: { name: string } | null;
-}
-
-const STATUS_LABELS: Record<StatusOrder["status"], string> = {
+const STATUS_LABELS: Record<OrderStatus, string> = {
   pending_review: "Pending review",
   confirmed: "Confirmed",
   ready_for_pickup: "Ready for pickup",
 };
 
-const STATUS_STEPS: StatusOrder["status"][] = [
+const STATUS_STEPS: OrderStatus[] = [
   "pending_review",
   "confirmed",
   "ready_for_pickup",
@@ -28,7 +19,7 @@ const STATUS_STEPS: StatusOrder["status"][] = [
 function StatusContent() {
   const searchParams = useSearchParams();
   const [phone, setPhone] = useState(searchParams.get("phone") ?? "");
-  const [orders, setOrders] = useState<StatusOrder[] | null>(null);
+  const [orders, setOrders] = useState<Order[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,9 +88,7 @@ function StatusContent() {
               className="rounded-lg border border-gray-200 bg-white p-4"
             >
               <div className="flex items-center justify-between">
-                <span className="font-semibold">
-                  {o.restaurants?.name ?? "Order"}
-                </span>
+                <span className="font-semibold">{o.restaurant_name}</span>
                 <span className="text-sm text-gray-600">
                   EGP {o.total_amount.toFixed(2)}
                 </span>

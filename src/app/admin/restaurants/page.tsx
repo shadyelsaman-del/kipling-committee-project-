@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { supabaseAdmin } from "@/lib/supabase";
-import type { Restaurant } from "@/types";
+import { listRestaurants } from "@/lib/data/restaurants";
 import { LogoutButton } from "../dashboard/logout-button";
 import { NewRestaurantForm } from "./new-restaurant-form";
 
@@ -13,12 +12,16 @@ export default async function AdminRestaurantsPage() {
     redirect("/admin");
   }
 
-  const { data: restaurants } = await supabaseAdmin
-    .from("restaurants")
-    .select("*")
-    .order("name");
-
-  const list = (restaurants ?? []) as Restaurant[];
+  let list;
+  try {
+    list = await listRestaurants();
+  } catch {
+    return (
+      <main className="flex-1 px-6 py-10 max-w-2xl mx-auto w-full">
+        <p className="text-red-600">Failed to load restaurants.</p>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 px-6 py-10 max-w-2xl mx-auto w-full">

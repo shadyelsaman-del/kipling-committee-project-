@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getScheduleInfo } from "@/lib/schedule";
-import { supabaseAdmin } from "@/lib/supabase";
-import type { Restaurant } from "@/types";
+import { listRestaurants } from "@/lib/data/restaurants";
 
 export const dynamic = "force-dynamic";
 
@@ -23,21 +22,16 @@ export default async function OrderPage() {
     );
   }
 
-  const { data: restaurants, error } = await supabaseAdmin
-    .from("restaurants")
-    .select("*")
-    .eq("is_active", true)
-    .order("name");
-
-  if (error) {
+  let restaurants;
+  try {
+    restaurants = (await listRestaurants()).filter((r) => r.is_active);
+  } catch {
     return (
       <main className="flex-1 flex items-center justify-center px-6 py-16 text-center text-red-600">
         Something went wrong loading restaurants. Please try again shortly.
       </main>
     );
   }
-
-  const list = (restaurants ?? []) as Restaurant[];
 
   return (
     <main className="flex-1 px-6 py-10 max-w-2xl mx-auto w-full">
@@ -52,13 +46,13 @@ export default async function OrderPage() {
         </span>
       </p>
 
-      {list.length === 0 ? (
+      {restaurants.length === 0 ? (
         <p className="mt-8 text-gray-500">
           No restaurants are available yet. Check back soon!
         </p>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
-          {list.map((r) => (
+          {restaurants.map((r) => (
             <li key={r.id}>
               <Link
                 href={`/order/${r.id}`}

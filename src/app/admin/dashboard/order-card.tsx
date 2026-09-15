@@ -2,13 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { Order, OrderItem, OrderStatus } from "@/types";
-
-export interface DashboardOrder extends Order {
-  restaurants: { name: string } | null;
-  order_items: OrderItem[];
-  screenshotUrl: string | null;
-}
+import type { Order, OrderStatus } from "@/types";
 
 const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: "pending_review", label: "Pending review" },
@@ -16,7 +10,7 @@ const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: "ready_for_pickup", label: "Ready for pickup" },
 ];
 
-export function OrderCard({ order }: { order: DashboardOrder }) {
+export function OrderCard({ order }: { order: Order }) {
   const router = useRouter();
   const [status, setStatus] = useState<OrderStatus>(order.status);
   const [updating, setUpdating] = useState(false);
@@ -46,9 +40,7 @@ export function OrderCard({ order }: { order: DashboardOrder }) {
             </span>
           </div>
           <div className="text-sm text-gray-600">{order.student_phone}</div>
-          <div className="text-sm text-gray-600 mt-1">
-            {order.restaurants?.name ?? "Unknown restaurant"}
-          </div>
+          <div className="text-sm text-gray-600 mt-1">{order.restaurant_name}</div>
         </div>
         <select
           value={status}
@@ -65,10 +57,10 @@ export function OrderCard({ order }: { order: DashboardOrder }) {
       </div>
 
       <ul className="mt-3 text-sm text-gray-700">
-        {order.order_items.map((item) => (
-          <li key={item.id} className="flex justify-between">
+        {order.items.map((item) => (
+          <li key={item.menuItemId} className="flex justify-between">
             <span>
-              {item.quantity}&times; {item.item_name}
+              {item.quantity}&times; {item.name}
             </span>
             <span>EGP {item.subtotal.toFixed(2)}</span>
           </li>
@@ -79,9 +71,9 @@ export function OrderCard({ order }: { order: DashboardOrder }) {
         <span>EGP {order.total_amount.toFixed(2)}</span>
       </div>
 
-      {order.screenshotUrl && (
+      {order.screenshot_url && (
         <a
-          href={order.screenshotUrl}
+          href={order.screenshot_url}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 inline-block text-sm text-brand-600 hover:underline"
