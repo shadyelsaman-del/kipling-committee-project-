@@ -1,6 +1,8 @@
 import "server-only";
 import { randomUUID } from "crypto";
 import { appendRow, getRows, updateRow } from "@/lib/google-sheets";
+import { readDb, writeDb } from "@/lib/local-store";
+import { isLocalMode } from "./mode";
 import type { Order, OrderLineItem, OrderStatus } from "@/types";
 
 const SHEET = "Orders";
@@ -86,31 +88,50 @@ export async function createOrder(input: {
     total_amount: input.totalAmount,
     items: input.items,
   };
+
+  if (isLocalMode()) {
+    const db = await readDb();
+    db.orders.push(order);
+    await writeDb(db);
+    return order;
+  }
+
   await appendRow(SHEET, toValues(order));
   return order;
 }
 
 export async function listOrdersByPhone(phone: string): Promise<Order[]> {
-  const rows = await getRows(SHEET);
-  return rows
-    .map((row) => parseRow(row.values))
-    .filter((order) => order.student_phone === phone)
-    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  const orders = isLocalMode()
+    ? (await readDb()).orders.filter((o) => o.student_phone === phone)
+    : (await getRows(SHEET)).map((row) => parseRow(row.values)).filter((o) => o.student_phone === phone);
+  return orders.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 }
 
 export async function listAllOrders(): Promise<Order[]> {
-  const rows = await getRows(SHEET);
-  return rows
-    .map((row) => parseRow(row.values))
-    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  const orders = isLocalMode()
+    ? (await readDb()).orders
+    : (await getRows(SHEET)).map((row) => parseRow(row.values));
+  return orders.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 }
 
 export async function listOrdersByRestaurant(restaurantId: string): Promise<Order[]> {
+  if (isLocalMode()) {
+    return (await readDb()).orders.filter((o) => o.restaurant_id === restaurantId);
+  }
   const rows = await getRows(SHEET);
   return rows.map((row) => parseRow(row.values)).filter((o) => o.restaurant_id === restaurantId);
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<boolean> {
+  if (isLocalMode()) {
+    const db = await readDb();
+    const index = db.orders.findIndex((o) => o.id === id);
+    if (index === -1) return false;
+    db.orders[index] = { ...db.orders[index], status };
+    await writeDb(db);
+    return true;
+  }
+
   const rows = await getRows(SHEET);
   const match = rows.find((row) => row.values[0] === id);
   if (!match) return false;

@@ -37,6 +37,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local demo-mode data (used when no Google Sheet is configured)
+/.data/
+/public/uploads/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

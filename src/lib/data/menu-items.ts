@@ -1,6 +1,8 @@
 import "server-only";
 import { randomUUID } from "crypto";
 import { appendRow, deleteRow, getRows, updateRow } from "@/lib/google-sheets";
+import { readDb, writeDb } from "@/lib/local-store";
+import { isLocalMode } from "./mode";
 import type { MenuItem } from "@/types";
 
 const SHEET = "MenuItems";
@@ -31,6 +33,9 @@ function toValues(m: MenuItem): (string | number)[] {
 }
 
 export async function listMenuItemsByRestaurant(restaurantId: string): Promise<MenuItem[]> {
+  if (isLocalMode()) {
+    return (await readDb()).menuItems.filter((item) => item.restaurant_id === restaurantId);
+  }
   const rows = await getRows(SHEET);
   return rows
     .map((row) => parseRow(row.values))
@@ -38,8 +43,11 @@ export async function listMenuItemsByRestaurant(restaurantId: string): Promise<M
 }
 
 export async function getMenuItemsByIds(ids: string[]): Promise<MenuItem[]> {
-  const rows = await getRows(SHEET);
   const idSet = new Set(ids);
+  if (isLocalMode()) {
+    return (await readDb()).menuItems.filter((item) => idSet.has(item.id));
+  }
+  const rows = await getRows(SHEET);
   return rows.map((row) => parseRow(row.values)).filter((item) => idSet.has(item.id));
 }
 
@@ -58,6 +66,14 @@ export async function createMenuItem(input: {
     is_available: true,
     created_at: new Date().toISOString(),
   };
+
+  if (isLocalMode()) {
+    const db = await readDb();
+    db.menuItems.push(item);
+    await writeDb(db);
+    return item;
+  }
+
   await appendRow(SHEET, toValues(item));
   return item;
 }
@@ -66,6 +82,15 @@ export async function updateMenuItem(
   id: string,
   update: Partial<Pick<MenuItem, "name" | "description" | "price" | "is_available">>
 ): Promise<boolean> {
+  if (isLocalMode()) {
+    const db = await readDb();
+    const index = db.menuItems.findIndex((item) => item.id === id);
+    if (index === -1) return false;
+    db.menuItems[index] = { ...db.menuItems[index], ...update };
+    await writeDb(db);
+    return true;
+  }
+
   const rows = await getRows(SHEET);
   const match = rows.find((row) => row.values[0] === id);
   if (!match) return false;
@@ -77,6 +102,15 @@ export async function updateMenuItem(
 }
 
 export async function deleteMenuItem(id: string): Promise<boolean> {
+  if (isLocalMode()) {
+    const db = await readDb();
+    const index = db.menuItems.findIndex((item) => item.id === id);
+    if (index === -1) return false;
+    db.menuItems.splice(index, 1);
+    await writeDb(db);
+    return true;
+  }
+
   const rows = await getRows(SHEET);
   const match = rows.find((row) => row.values[0] === id);
   if (!match) return false;
@@ -85,6 +119,13 @@ export async function deleteMenuItem(id: string): Promise<boolean> {
 }
 
 export async function deleteMenuItemsByRestaurant(restaurantId: string): Promise<void> {
+  if (isLocalMode()) {
+    const db = await readDb();
+    db.menuItems = db.menuItems.filter((item) => item.restaurant_id !== restaurantId);
+    await writeDb(db);
+    return;
+  }
+
   const rows = await getRows(SHEET);
   const matches = rows.filter((row) => row.values[1] === restaurantId);
   // Delete from the bottom up so earlier row numbers stay valid.

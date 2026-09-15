@@ -3,7 +3,7 @@ import { getScheduleInfo } from "@/lib/schedule";
 import { getMenuItemsByIds } from "@/lib/data/menu-items";
 import { getRestaurant } from "@/lib/data/restaurants";
 import { createOrder } from "@/lib/data/orders";
-import { uploadScreenshot } from "@/lib/google-drive";
+import { uploadScreenshot } from "@/lib/screenshot-storage";
 import {
   ALLOWED_SCREENSHOT_TYPES,
   MAX_SCREENSHOT_SIZE_BYTES,

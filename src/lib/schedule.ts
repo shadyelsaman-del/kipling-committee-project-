@@ -36,6 +36,18 @@ export interface ScheduleInfo {
  * (delivery Tuesday), based on the school's local (Cairo) calendar day.
  */
 export function getScheduleInfo(now: Date = new Date()): ScheduleInfo {
+  // Testing-only escape hatch so the ordering flow can be tried on any day
+  // without waiting for Saturday/Monday. Never set this in production.
+  if (process.env.ALLOW_ORDERING_ANY_DAY === "true") {
+    const tomorrow = new Date(now);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    return {
+      isOpen: true,
+      orderingDay: "saturday",
+      deliveryDate: tomorrow.toISOString().slice(0, 10),
+    };
+  }
+
   const { weekday, year, month, day } = getCairoDateParts(now);
 
   if (weekday === "Sat" || weekday === "Mon") {
