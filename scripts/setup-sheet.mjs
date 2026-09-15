@@ -55,6 +55,7 @@ const SHEETS = {
     "total_amount",
     "items_json",
   ],
+  Settings: ["mode", "delivery_date"],
 };
 
 async function main() {

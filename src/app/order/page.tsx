@@ -5,7 +5,7 @@ import { listRestaurants } from "@/lib/data/restaurants";
 export const dynamic = "force-dynamic";
 
 export default async function OrderPage() {
-  const schedule = getScheduleInfo();
+  const schedule = await getScheduleInfo();
 
   if (!schedule.isOpen) {
     return (

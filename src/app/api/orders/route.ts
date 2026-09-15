@@ -11,7 +11,7 @@ import {
 import type { CartLine, OrderLineItem } from "@/types";
 
 export async function POST(req: NextRequest) {
-  const schedule = getScheduleInfo();
+  const schedule = await getScheduleInfo();
   if (!schedule.isOpen || !schedule.deliveryDate) {
     return NextResponse.json(
       { error: "Ordering is currently closed." },

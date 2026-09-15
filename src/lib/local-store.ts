@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import type { MenuItem, Order, Restaurant } from "@/types";
+import type { Settings } from "./data/settings";
 
 // Vercel's deployed bundle directory is read-only; only /tmp is writable
 // there. Locally, keep the data in the project so it's easy to find.
@@ -16,6 +17,7 @@ export interface LocalDb {
   restaurants: Restaurant[];
   menuItems: MenuItem[];
   orders: Order[];
+  settings?: Settings;
 }
 
 const EMPTY_DB: LocalDb = { restaurants: [], menuItems: [], orders: [] };

@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { listAllOrders } from "@/lib/data/orders";
 import type { Order } from "@/types";
+import { AdminNav } from "../admin-nav";
 import { LogoutButton } from "./logout-button";
 import { OrderCard } from "./order-card";
 
@@ -37,12 +37,7 @@ export default async function AdminDashboardPage() {
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <LogoutButton />
       </div>
-      <div className="mt-2 flex gap-4 text-sm">
-        <span className="text-gray-400">Orders</span>
-        <Link href="/admin/restaurants" className="text-brand-600 hover:underline">
-          Restaurants &amp; Menus
-        </Link>
-      </div>
+      <AdminNav />
 
       {dates.length === 0 && (
         <p className="mt-8 text-gray-500">No orders yet.</p>

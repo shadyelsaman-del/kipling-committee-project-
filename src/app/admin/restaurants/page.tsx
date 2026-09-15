@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { listRestaurants } from "@/lib/data/restaurants";
+import { AdminNav } from "../admin-nav";
 import { LogoutButton } from "../dashboard/logout-button";
 import { NewRestaurantForm } from "./new-restaurant-form";
 
@@ -29,12 +30,7 @@ export default async function AdminRestaurantsPage() {
         <h1 className="text-2xl font-bold">Restaurants &amp; Menus</h1>
         <LogoutButton />
       </div>
-      <div className="mt-2 flex gap-4 text-sm">
-        <Link href="/admin/dashboard" className="text-brand-600 hover:underline">
-          Orders
-        </Link>
-        <span className="text-gray-400">Restaurants &amp; Menus</span>
-      </div>
+      <AdminNav />
 
       <NewRestaurantForm />
 

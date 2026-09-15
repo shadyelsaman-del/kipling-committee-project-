@@ -13,7 +13,7 @@ export default async function RestaurantMenuPage({
   params: Promise<{ restaurantId: string }>;
 }) {
   const { restaurantId } = await params;
-  const schedule = getScheduleInfo();
+  const schedule = await getScheduleInfo();
 
   if (!schedule.isOpen) {
     return (
